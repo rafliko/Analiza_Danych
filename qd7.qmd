@@ -1,0 +1,88 @@
+---
+title: "Doc"
+author: "Rafal Palka"
+date: today
+lang: pl
+language: 
+  title-block-author-single: "Autor"
+  title-block-published: "Utworzono"
+format:
+  html:
+    theme:
+      light: flatly
+      dark: darkly
+    highlight-style: arrow
+    df-print: paged
+    toc: true
+    toc-depth: 4
+    code-fold: show
+    code-link: true
+    self-contained: true
+    code-tools:
+      source: true
+# execute:
+#   message: false
+#   warning: false
+---
+
+```{r}
+library(tidyverse)
+library(fivethirtyeight)
+library(tidytext)
+library(ggtext)
+library(countrycode)
+```
+
+```{r}
+drinks %>%
+  pivot_longer(cols = ends_with("servings"), 
+               names_to = "alcohol", 
+               values_to = "ile", 
+               names_pattern = "(.+)_") %>% 
+  relocate(total_litres_of_pure_alcohol, .after = everything()) %>% 
+  mutate(czy_polska = country == "Poland",
+         continent = countrycode(country, origin = "country.name", destination = "continent"),
+         country = countrycode(country, origin = "country.name", destination = "cldr.name.pl"),
+         etykieta = if_else(czy_polska, paste0("<span style='color:#8B0000;'>**", country, "**</span>"), country),
+         etykieta = reorder_within(etykieta, by = ile, within = alcohol),
+         alcohol = fct_recode(alcohol, "wino" = "wine", "piwo" = "beer", "spirytus" = "spirit"),
+         alcohol = fct_relevel(alcohol, "wino", "piwo", "spirytus")) %>% 
+  group_by(alcohol) %>% 
+  slice_max(ile, n = 20) %>% 
+  filter(continent == "Europe") %>% 
+  
+  ggplot(aes(ile, etykieta)) +
+  geom_col(aes(fill = czy_polska), show.legend = FALSE) +
+  geom_text(aes(label = ile), hjust = 1.15, size = 3.0, fontface = "bold", colour = "white") +
+  facet_wrap(~ alcohol, scales = "free_y") +
+  scale_y_reordered() +
+  scale_fill_manual(values = c("TRUE" = "darkred", "FALSE" = "darkgray")) +
+  labs(title = "Spożycie alkoholu", x = "") +
+  theme_minimal() + 
+  theme(axis.text.x = element_blank(),
+        panel.grid = element_blank(),
+        plot.title = element_text(hjust = 0.5, size = 13, face = "bold"),
+        axis.text.y.left = element_markdown(),
+        strip.text = element_text(face = "bold"))
+```
+
+```{r}
+countrycode("kosovo", origin = "country.name", destination = "cldr.name.pl")
+```
+
+```{r}
+drinks %>%
+  pivot_longer(cols = ends_with("servings"), 
+               names_to = "alcohol", 
+               values_to = "ile", 
+               names_pattern = "(.+)_") %>% 
+  relocate(total_litres_of_pure_alcohol, .after = everything()) %>% 
+  mutate(czy_polska = country == "Poland",
+         continent = countrycode(country, origin = "country.name", destination = "continent"),
+         country = countrycode(country, origin = "country.name", destination = "cldr.name.pl"),
+         etykieta = if_else(czy_polska, paste0("<span style='color:#8B0000;'>**", country, "**</span>"), country),
+         etykieta = reorder_within(etykieta, by = ile, within = alcohol),
+         alcohol = fct_recode(alcohol, "wino" = "wine", "piwo" = "beer", "spirytus" = "spirit"),
+         alcohol = fct_relevel(alcohol, "wino", "piwo", "spirytus")) %>% 
+  count(continent)
+```

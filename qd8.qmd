@@ -1,0 +1,65 @@
+---
+title: "Doc"
+author: "Rafal Palka"
+date: today
+# date 09 10 2026
+lang: pl
+language: 
+  title-block-author-single: "Autor"
+  title-block-published: "Utworzono"
+format:
+  html:
+    theme:
+      light: flatly
+      dark: darkly
+    highlight-style: arrow
+    df-print: paged
+    toc: true
+    toc-depth: 4
+    code-fold: show
+    code-link: true
+    self-contained: true
+    code-tools:
+      source: true
+# execute:
+#   message: false
+#   warning: false
+---
+
+```{r}
+library(tidyverse)
+library(readxl)
+```
+
+```{r}
+urodzenia <- read_xlsx(path = "dane/pl_uro_2025_00_7.xlsx", 
+          sheet = "Ogółem",
+          range = "C11:N41",
+          col_names = paste0("m_", 1:12),
+          na = "-") %>% 
+  mutate(dzien = row_number()) %>% 
+  select(dzien, everything()) %>% 
+  pivot_longer(cols = starts_with("m"), 
+               names_to = "miesiac",
+               names_pattern = "m_(.+)",
+               values_to = "ile") %>% 
+  mutate(miesiac = month(as.integer(miesiac), label = TRUE, abbr = TRUE), 
+         dzien = factor(dzien)) %>%
+  arrange(miesiac, dzien) %>% 
+  #filter(!is.na(ile))
+  drop_na(ile)
+
+urodzenia
+```
+
+```{r}
+month(11, label = TRUE, abbr = TRUE)
+```
+
+```{r}
+urodzenia %>%
+  ggplot(aes(miesiac, dzien)) + 
+  geom_tile(aes(fill = ile)) + 
+  scale_fill_gradient2(low = "blue", mid = "white", high = "red", midpoint = 600) +  
+  theme_minimal()
+```

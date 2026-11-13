@@ -1,0 +1,27 @@
+---
+title: "Doc"
+author: "Rafal Palka"
+date: today
+# date 09 10 2026
+lang: pl
+language: 
+  title-block-author-single: "Autor"
+  title-block-published: "Utworzono"
+format:
+  html:
+    theme:
+      light: flatly
+      dark: darkly
+    highlight-style: arrow
+    df-print: paged
+    toc: true
+    toc-depth: 4
+    code-fold: show
+    code-link: true
+    self-contained: true
+    code-tools:
+      source: true
+# execute:
+#   message: false
+#   warning: false
+---

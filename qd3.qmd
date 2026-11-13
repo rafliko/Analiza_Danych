@@ -1,0 +1,74 @@
+---
+title: "Doc"
+author: "Rafal Palka"
+date: today
+# date 09 10 2026
+lang: pl
+language: 
+  title-block-author-single: "Autor"
+  title-block-published: "Utworzono"
+format:
+  html:
+    theme:
+      light: flatly
+      dark: darkly
+    highlight-style: arrow
+    df-print: paged
+    toc: true
+    toc-depth: 4
+    code-fold: show
+    code-link: true
+    self-contained: true
+    code-tools:
+      source: true
+# execute:
+#   message: false
+#   warning: false
+---
+
+```{r}
+library(tidyverse)
+```
+
+```{r}
+load("dane/imiona_df.Rda")
+```
+
+```{r}
+imiona <- imiona_df
+imiona
+```
+
+```{r}
+meskie <- unique(filter(imiona, plec == "M")$imie)
+zenskie <- unique(filter(imiona, plec == "K")$imie)
+```
+
+```{r}
+meskie[str_starts(meskie, "B")]
+```
+
+```{r}
+# $ - od końca
+# ^ - od początku
+# [] - zbiór znaków
+# [^] - negacja zbioru
+
+str_subset(meskie, pattern = "a$")
+str_subset(zenskie, pattern = "a$", negate = TRUE)
+str_subset(zenskie, pattern = "[^a]$")
+str_subset(meskie, pattern = "^S[^aeiouy]")
+```
+
+```{r}
+# table - zlicza wystąpienia
+barplot(table(str_sub(zenskie, start = 1, end = 1)), col = "pink")
+```
+
+```{r}
+barplot(table(str_sub(meskie, start = 1, end = 1)), col = "navy")
+```
+
+```{r}
+barplot(table(str_sub(meskie, start = -1, end = -1)), col = "black")
+```

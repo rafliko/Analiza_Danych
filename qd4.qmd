@@ -1,0 +1,129 @@
+---
+title: "Doc"
+author: "Rafal Palka"
+date: today
+# date 09 10 2026
+lang: pl
+language: 
+  title-block-author-single: "Autor"
+  title-block-published: "Utworzono"
+format:
+  html:
+    theme:
+      light: flatly
+      dark: darkly
+    highlight-style: arrow
+    df-print: paged
+    toc: true
+    toc-depth: 4
+    code-fold: show
+    code-link: true
+    self-contained: true
+    code-tools:
+      source: true
+# execute:
+#   message: false
+#   warning: false
+---
+
+```{r}
+library(tidyverse)
+load("dane/imiona_df.Rda")
+imiona <- imiona_df
+```
+
+```{r}
+str_extract_all("Ja mam kota", pattern = "a.")
+```
+
+```{r}
+filter(imiona_df, imie == "Jan", rok == 2010)
+```
+
+Ctrl + shift + m -\> pipe (%\>%, \|\>)
+
+```{r}
+mean(1:10)
+1:10 %>% mean()
+```
+
+```{r}
+c(5, 8)
+
+5 %>% c(8)
+5 |> c(8)
+8 %>% c(5, .)
+8 |> c(5, .) # <- błąd
+```
+
+```{r}
+imiona %>% 
+  filter(imie == "Piotr", rok == 2010) %>% 
+  select(rok:liczba, plec)
+```
+
+```{r}
+imiona %>% 
+  select(-imie)
+```
+
+```{r}
+imiona %>% 
+  group_by(plec) %>% 
+  summarise(ile_dzieci = sum(liczba)) %>% 
+  arrange(desc(ile_dzieci))
+```
+
+```{r}
+imiona %>% 
+  count(plec, sort = TRUE)
+```
+
+```{r}
+imiona %>% 
+  filter(imie == "Jan", rok == 2015) %>%
+  summarise(ile_janow = sum(liczba))
+```
+
+```{r}
+imiona %>% 
+  filter(plec == "K", rok == 2015) %>%
+  group_by(imie) %>% 
+  summarise(ile_dzieci = sum(liczba)) %>% 
+  # arrange(desc(ile_dzieci)) %>% 
+  # head(3)
+  slice_max(ile_dzieci, n = 3)
+```
+
+```{r}
+moje_dane <- tibble(a = LETTERS[1:6], b = 10)
+moje_dane %>% 
+  slice_max(b, n = 1)
+```
+
+```{r}
+imiona %>% 
+  select(rok, miesiac) %>% 
+  arrange(rok, miesiac) %>% 
+  slice(1, nrow(.))
+```
+
+```{r}
+imiona %>% 
+  select(imie, rok, liczba) %>% 
+  filter(rok >= 2005, rok <= 2015, imie == "Rafał") %>% 
+  group_by(rok) %>% 
+  summarise(ile_dzieci = sum(liczba))
+```
+
+```{r}
+licz_ile <- function(podane_imie) {
+  imiona %>% 
+    select(imie, rok, liczba) %>% 
+    filter(rok >= 2005, rok <= 2015, imie == podane_imie) %>% 
+    group_by(rok) %>% 
+    summarise(ile_dzieci = sum(liczba))
+}
+
+licz_ile("Magdalena")
+```

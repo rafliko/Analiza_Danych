@@ -1,0 +1,69 @@
+---
+title: "Doc"
+author: "Rafal Palka"
+date: today
+# date 09 10 2026
+lang: pl
+language: 
+  title-block-author-single: "Autor"
+  title-block-published: "Utworzono"
+format:
+  html:
+    theme:
+      light: flatly
+      dark: darkly
+    highlight-style: arrow
+    df-print: paged
+    toc: true
+    toc-depth: 4
+    code-fold: show
+    code-link: true
+    self-contained: true
+    code-tools:
+      source: true
+# execute:
+#   message: false
+#   warning: false
+---
+
+```{r}
+#| message: false
+#| warning: false
+library(PogromcyDanych)
+library(stringr)
+```
+
+```{r}
+koty_ptaki
+koty_ptaki[3, 1]
+```
+
+```{r}
+print(1:5)
+for (i in 1:3) {
+  print(i)
+}
+cat("sus")
+print(koty_ptaki$gatunek)
+cat(as.character(koty_ptaki$gatunek), sep="\n")
+```
+
+```{r}
+paste("ala", "ola", sep = ";")
+paste0("a","b")
+```
+
+```{r}
+v <- paste(LETTERS[1:4], 1:4, sep = "_")
+cat(v, sep="\n")
+```
+
+```{r}
+cat(paste(koty_ptaki$gatunek, koty_ptaki$predkosc), sep = "\n")
+```
+
+```{r}
+dots <- str_dup("#", koty_ptaki$predkosc/5)
+names <- str_pad(paste0(koty_ptaki$gatunek, "[", koty_ptaki$predkosc, "]"), 25, "right")
+cat(paste(names, dots), sep = "\n")
+```

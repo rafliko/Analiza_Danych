@@ -1,0 +1,67 @@
+---
+title: "Doc"
+author: "Rafal Palka"
+date: today
+# date 09 10 2026
+lang: pl
+language: 
+  title-block-author-single: "Autor"
+  title-block-published: "Utworzono"
+format:
+  html:
+    theme:
+      light: flatly
+      dark: darkly
+    highlight-style: arrow
+    df-print: paged
+    toc: true
+    toc-depth: 4
+    code-fold: show
+    code-link: true
+    self-contained: true
+    code-tools:
+      source: true
+---
+
+## Quarto
+
+Quarto enables you to weave together content and executable code into a finished document. To learn more about Quarto see <https://quarto.org>.
+
+## Running Code
+
+When you click the **Render** button a document will be generated that includes both content and the output of embedded code. You can embed code like this:
+
+```{r}
+1 + 1
+"ABCDEFG"
+```
+
+You can add options to executable code like this
+
+```{r}
+#| echo: false
+2 * 2
+```
+
+The `echo: false` option disables the printing of code (only output is displayed).
+
+Alt + ctrl + i -\> nowy chunk
+
+```{r}
+x <- c(2, 10:-2, 7)
+length(x)
+head(x)
+tail(x, n=3)
+```
+
+```{r}
+wektor <- 1:10
+```
+
+\` \<- kod w tekscie
+
+Średnia wektora `wektor` wynosi `r round(mean(wektor), 2)`
+
+$$
+\lim_{x\to + \infty} x^2 + 5 = ...
+$$

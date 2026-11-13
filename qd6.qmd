@@ -1,0 +1,147 @@
+---
+title: "Doc"
+author: "Rafal Palka"
+date: today
+lang: pl
+language: 
+  title-block-author-single: "Autor"
+  title-block-published: "Utworzono"
+format:
+  html:
+    theme:
+      light: flatly
+      dark: darkly
+    highlight-style: arrow
+    df-print: paged
+    toc: true
+    toc-depth: 4
+    code-fold: show
+    code-link: true
+    self-contained: true
+    code-tools:
+      source: true
+# execute:
+#   message: false
+#   warning: false
+---
+
+```{r}
+library(tidyverse)
+library(tidytext)
+load("dane/imiona_df.Rda")
+imiona <- imiona_df
+```
+
+```{r}
+imiona %>% 
+  group_by(imie) %>% 
+  summarise(ile = sum(liczba)) %>% 
+  slice_max(ile, n = 15) %>% 
+  mutate(imie = fct_reorder(imie, ile)) %>% 
+  ggplot(aes(ile, imie)) +
+  geom_col()
+```
+
+```{r}
+p <- imiona %>% 
+  filter(between(rok, 2005, 2015)) %>% 
+  group_by(rok, plec, imie) %>% 
+  summarise(ile = sum(liczba)) %>% 
+  slice_max(ile, n = 3) %>% 
+  mutate(imie = reorder_within(imie, ile, rok)) %>% 
+  ggplot(aes(ile, imie, fill = plec)) +
+  geom_col() + 
+  geom_text(aes(label = ile), hjust = 1.15, size = 2.5, fontface = "bold", colour = "white") +
+  facet_wrap(~ rok, ncol = 3, scales = "free_y") +
+  labs(title = "Najpopularniejsze imiona w Warszawie", 
+       subtitle = "w latach 2005-2015",
+       x = "",
+       y = "") +
+  scale_fill_manual(name = "", 
+                    values = c("K" = "#F472B6", "M" = "#60A5FA"), 
+                    labels = c("K" = "Dziewczynki", "M" = "Chłopcy")) +
+  scale_y_reordered() +
+  scale_x_continuous(expand = c(0,0)) +
+  theme_minimal() +
+  theme(legend.position = "top",
+        plot.title = element_text(size = 12, hjust = 0.5, face = "bold"),
+        plot.subtitle = element_text(size = 10, hjust = 0.5, face = "italic"),
+        axis.text.x = element_blank(),
+        panel.grid = element_blank(),
+        strip.text = element_text(face = "bold"))
+
+ggsave(filename = "wykres1.png", 
+       plot = p,
+       path = "wykresy/",
+       units = "cm",
+       height = 20,
+       dpi = 300)
+
+p
+```
+
+```{r}
+a <- imiona %>% 
+  filter(between(rok, 2005, 2015)) %>% 
+  group_by(rok, plec, imie) %>% 
+  summarise(ile = sum(liczba)) %>% 
+  slice_max(ile, n = 3) %>% 
+  mutate(font = ifelse(ile == max(ile), "bold", "plain"))
+
+q <- a %>% 
+  ungroup(plec) %>% 
+  mutate(numer = row_number()) %>% 
+  ungroup() %>% 
+  mutate(numer_wiersza = row_number()) %>% 
+  mutate(imie = reorder_within(imie, rev(numer), rok)) %>% 
+  ggplot(aes(ile, imie, fill = plec)) +
+  geom_col() + 
+  geom_text(aes(label = ile), hjust = 1.15, size = 2.5, fontface = "bold", colour = "white") +
+  facet_wrap(~ rok, ncol = 3, scales = "free_y") +
+  labs(title = "Najpopularniejsze imiona w Warszawie", 
+       subtitle = "w latach 2005-2015",
+       x = "",
+       y = "") +
+  scale_fill_manual(name = "", 
+                    values = c("K" = "#F472B6", "M" = "#60A5FA"), 
+                    labels = c("K" = "Dziewczynki", "M" = "Chłopcy")) +
+  scale_y_reordered() +
+  scale_x_continuous(expand = c(0,0)) +
+  theme_minimal() +
+  theme(legend.position = "top",
+        plot.title = element_text(size = 12, hjust = 0.5, face = "bold"),
+        plot.subtitle = element_text(size = 10, hjust = 0.5, face = "italic"),
+        axis.text.x = element_blank(),
+        panel.grid = element_blank(),
+        strip.text = element_text(face = "bold"),
+        axis.text.y = element_text(face = a$font))
+
+ggsave(filename = "wykres2.png", 
+       plot = q,
+       path = "wykresy/",
+       units = "cm",
+       height = 20,
+       dpi = 300)
+
+q
+```
+
+```{r}
+imiona %>% 
+  filter(between(rok, 2005, 2015)) %>% 
+  group_by(rok, plec) %>% 
+  summarise(ile = sum(liczba)) %>% 
+  ggplot(aes(rok, ile)) + 
+  geom_col(fill = "grey60") +
+  geom_col(aes(fill = plec), position = "dodge", width = 0.7) + 
+  theme_minimal()
+```
+
+```{r}
+imiona %>% 
+  filter(between(rok, 2005, 2015)) %>% 
+  group_by(rok, plec) %>% 
+  summarise(ile = sum(liczba)) %>% 
+  pivot_wider(names_from = plec, values_from = ile) %>% 
+  mutate(roznica = M - K)
+```

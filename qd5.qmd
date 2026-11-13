@@ -1,0 +1,170 @@
+---
+title: "Doc"
+author: "Rafal Palka"
+date: today
+# date 09 10 2026
+lang: pl
+language: 
+  title-block-author-single: "Autor"
+  title-block-published: "Utworzono"
+format:
+  html:
+    theme:
+      light: flatly
+      dark: darkly
+    highlight-style: arrow
+    df-print: paged
+    toc: true
+    toc-depth: 4
+    code-fold: show
+    code-link: true
+    self-contained: true
+    code-tools:
+      source: true
+# execute:
+#   message: false
+#   warning: false
+---
+
+```{r}
+library(tidyverse)
+library(skimr)
+load("dane/imiona_df.Rda")
+imiona <- imiona_df
+```
+
+```{r}
+imiona
+```
+
+```{r}
+str(imiona)
+```
+
+```{r}
+glimpse(imiona)
+```
+
+```{r}
+skim(imiona)
+```
+
+```{r}
+imiona %>% 
+  filter(rok == 2010, imie == "Anna") %>% 
+  group_by(miesiac) %>% 
+  summarise(ile = sum(liczba))
+```
+
+```{r}
+imiona %>% 
+  mutate(litery = paste(str_sub(imie, 1, 1), str_sub(imie, -1, -1), sep = "_"))
+```
+
+```{r}
+imiona %>% 
+  mutate(litery = str_replace(imie, 
+                              "^[^AEIOUYaeiouy]*(.).*", 
+                              replacement = str_dup("\\1", str_length(imie))
+                              )
+  )
+```
+
+```{r}
+moje_dane <- tibble(
+  litery = c("A","A","B","C","C"),
+  liczby = c(1, 2 , 4, 3, 3)
+)
+moje_dane %>% distinct(litery)
+```
+
+```{r}
+# Imie damskie i męskie
+imiona %>% 
+  distinct(imie, plec) %>% 
+  count(imie) %>% 
+  filter(n == 2)
+```
+
+```{r}
+# Imie damskie i męskie - inny sposób
+imiona %>% 
+  distinct(imie, plec) %>% 
+  filter(duplicated(imie))
+```
+
+```{r}
+library(babynames)
+babynames
+```
+
+```{r}
+babynames %>% 
+  distinct(name, sex) %>% 
+  count(name) %>% 
+  filter(n == 2)
+```
+
+```{r}
+babynames %>% 
+  filter(name == "Raphael", sex == "F") %>% 
+  group_by(year) %>% 
+  summarise(count = sum(n))
+```
+
+```{r}
+babynames %>% 
+  filter(n == max(n))
+```
+
+```{r}
+rys_wyk_pop <- function(im, kol) {
+  imiona %>% 
+    filter(imie == im, between(rok, 2005, 2015)) %>% 
+    group_by(rok) %>% 
+    summarise(ile = sum(liczba)) %>%
+    ggplot(aes(x = rok, y = ile)) + 
+    geom_line(colour = kol, size = 1.2) + 
+    geom_point(colour = kol, size = 2.0) +
+    labs(title = paste("Popularność imienia", im), x = "", y = "") +
+    scale_x_continuous(breaks = 2005:2015) + 
+    theme_minimal()
+}
+```
+
+```{r}
+rys_wyk_pop("Stanisław", "red4")
+```
+
+```{r}
+wybrane_imiona <- c("Barbara", "Maria", "Stanisław", "Ignacy", "Żyraf")
+
+p <- imiona %>% 
+  filter(imie %in% wybrane_imiona, between(rok, 2005, 2015)) %>% 
+  group_by(rok, imie) %>% 
+  summarise(ile = sum(liczba)) %>%
+  ggplot(aes(x = rok, y = ile, colour = imie)) + 
+  geom_line(size = 1.2) + 
+  geom_point(size = 2.0) +
+  scale_x_continuous(breaks = 2005:2015) + 
+  theme_minimal()
+p
+```
+
+```{r}
+library(plotly)
+ggplotly(p)
+```
+
+```{r}
+top10 <- imiona %>%
+  group_by(imie) %>% 
+  summarise(ile = sum(liczba)) %>% 
+  arrange(desc(ile)) %>% 
+  slice_max(ile, n = 10)
+
+top10 %>% 
+  ggplot(aes(x = ile, y = imie)) + 
+  geom_col(fill = "black") +
+  theme_minimal()
+```
