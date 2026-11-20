@@ -1,0 +1,78 @@
+---
+title: "Doc"
+author: "Rafal Palka"
+date: today
+# date 09 10 2026
+lang: pl
+language: 
+  title-block-author-single: "Autor"
+  title-block-published: "Utworzono"
+format:
+  html:
+    theme:
+      light: flatly
+      dark: darkly
+    highlight-style: arrow
+    df-print: paged
+    toc: true
+    toc-depth: 4
+    code-fold: show
+    code-link: true
+    self-contained: true
+    code-tools:
+      source: true
+# execute:
+#   message: false
+#   warning: false
+---
+
+```{r}
+library(tidyverse)
+library(dygraphs)
+library(janitor)
+library(timetk)
+```
+
+```{r}
+euro <- read_csv("dane/euro.csv") %>% 
+  clean_names() %>% 
+  rename(euro = kurs_sredni) %>% 
+  select(data, euro)
+
+euro
+```
+
+```{r}
+dolar <- read_csv("dane/dolar.csv") %>% 
+  clean_names() %>% 
+  rename(dolar = kurs_sredni) %>% 
+  select(data, dolar)
+
+dolar
+```
+
+```{r}
+waluty <- euro %>% left_join(dolar)
+```
+
+```{r}
+lungDeaths <- cbind(mdeaths, fdeaths)
+dygraph(lungDeaths)
+```
+
+```{r}
+waluty_xts <- tk_xts(waluty, date_var = data, select = euro:dolar)
+```
+
+```{r}
+dygraph(waluty_xts) %>% 
+  dyRangeSelector()
+```
+
+```{r}
+dygraph(waluty_xts) %>% 
+  dySeries("euro", label = "Euro", color = "blue") %>% 
+  dySeries("dolar", label = "Dolar", color = "green") %>% 
+  dyOptions(fillGraph = TRUE) %>% 
+  dyRangeSelector(height = 20)
+```
