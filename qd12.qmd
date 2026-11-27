@@ -1,0 +1,85 @@
+---
+title: "Doc"
+author: "Rafal Palka"
+date: today
+# date 09 10 2026
+lang: pl
+language: 
+  title-block-author-single: "Autor"
+  title-block-published: "Utworzono"
+format:
+  html:
+    theme:
+      light: flatly
+      dark: darkly
+    highlight-style: arrow
+    df-print: paged
+    toc: true
+    toc-depth: 4
+    code-fold: show
+    code-link: true
+    self-contained: true
+    code-tools:
+      source: true
+# execute:
+#   message: false
+#   warning: false
+---
+
+```{r}
+library(tidyverse)
+```
+
+```{r}
+noble <- read_csv("dane/nobel_laureates.csv")
+```
+
+```{r}
+noble %>% 
+  drop_na(birth_continent) %>% 
+  ggplot(aes(y = birth_continent, fill = category)) +
+  geom_bar() + 
+  theme_minimal()
+
+p_1 <- noble %>% 
+  drop_na(birth_continent) %>% 
+  ggplot(aes(y = category, fill = birth_continent)) +
+  geom_bar(position = "fill") + 
+  theme_minimal()
+
+plotly::ggplotly(p_1)
+```
+
+```{r}
+noble %>% 
+  filter(str_detect(birth_country, "Russia")) %>% 
+  select(known_name, birth_city, birth_country)
+```
+
+```{r}
+noble_polska <- noble %>% 
+  filter(birth_country == "Poland" |
+           birth_country_now == "Poland" |
+           death_country_now == "Poland") %>% 
+  mutate(known_name = fct_reorder(known_name, birth_date) %>% fct_rev(),
+         death_date = replace_na(death_date, today()))
+
+p <- noble_polska %>% 
+  ggplot() +
+  geom_segment(aes(x = birth_date, xend = death_date, y = known_name), linewidth = 10, colour = "grey30") +
+  geom_text(aes(birth_date, known_name, label = known_name), 
+            colour =  "white", 
+            fontface = "bold", 
+            size = 3.5, 
+            hjust = 0, 
+            nudge_x = 500) +
+  geom_text(aes(x = birth_date, y = known_name, label = paste("★", birth_year)),
+            hjust = 1, nudge_x = -400, size = 3.5, fontface = "bold") +
+  labs(title = "Nobliści powiązani z Polską", x = NULL, y = NULL) +
+  theme_minimal() + 
+  theme(
+    axis.text = element_blank()
+  )
+
+ggsave(filename = "noble_polska.png", plot = p, path = "wykresy/", units = "cm", width = 34, height = 30, dpi = 300)
+```
